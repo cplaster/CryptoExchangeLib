@@ -1,0 +1,8 @@
+﻿cplaster - 2018-06-19 22:52:00
+----------------------------------------------------------------------------------------------------------
+Trying a different approach for the core crypto exchange library. This is a significant shift in a few
+key areas. Namely, less reliance on generics, generated json classes, and reflection.
+
+This should end up being a good deal cleaner, though its a work in progress at the moment.
+
+All public API calls and most private API calls should work just fine for both Cryptopia and Bittrex.
