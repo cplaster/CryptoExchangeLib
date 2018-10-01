@@ -39,32 +39,32 @@ namespace CryptoExchangeLib.Common
 
     public class MarketHistoryRequest : IRequest
     {
-        public MarketHistoryRequest(string tradePair)
+        public MarketHistoryRequest(TradePair tradePair)
         {
-            TradePairId = tradePair;
+            TradePair = tradePair;
         }
-        public string TradePairId { get; set; }
+        public TradePair TradePair { get; set; }
     }
 
     public class MarketOrdersRequest : IRequest
     {
-        public MarketOrdersRequest(string tradePair, int? orderCount = null)
+        public MarketOrdersRequest(TradePair tradePair, int? orderCount = null)
         {
-            TradePairId = tradePair;
+            TradePair = tradePair;
             OrderCount = orderCount;
         }
-        public string TradePairId { get; set; }
+        public TradePair TradePair { get; set; }
         public int? OrderCount { get; set; }
     }
 
     public class MarketRequest : IRequest
     {
-        public MarketRequest(string tradePair, int? hours = null)
+        public MarketRequest(TradePair tradePair, int? hours = null)
         {
-            TradePairId = tradePair;
+            TradePair = tradePair;
             Hours = hours;
         }
-        public string TradePairId { get; set; }
+        public TradePair TradePair { get; set; }
         public int? Hours { get; set; }
     }
 
@@ -526,6 +526,15 @@ namespace CryptoExchangeLib.Common
         public List<int> FilledOrders { get; set; }
     }
 
+    public class TradePair
+    {
+        public int? Id { get; set; }
+        public string BaseLabel { get; set; }
+        public string CurrencyLabel { get; set; }
+        public string PairLabel { get { return BaseLabel + "-" + CurrencyLabel; } }
+        
+    }
+
     public enum TradeType
     {
         Buy,
@@ -743,9 +752,18 @@ namespace CryptoExchangeLib.Common
 
         #endregion
 
+        #region Shim Methods
+
+        string DoPublic(PublicApiCall call, string response);
+        string DoPrivate(PrivateApiCall call, string response);
+        string GetTradePairLabel(TradePair tradePair);
+
+        #endregion
+
     }
 
     #endregion
+
 
     #region Converter Class
 

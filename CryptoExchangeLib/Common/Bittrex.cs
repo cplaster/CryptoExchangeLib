@@ -90,7 +90,7 @@ namespace CryptoExchangeLib.Common
                 return new T() { Success = false, Error = "No Response." };
             }
 
-            string result = Shim.DoPublic(call, response.Result);
+            string result = DoPublic(call, response.Result);
 
             return GetObject<T>(result);
         }
@@ -122,18 +122,18 @@ namespace CryptoExchangeLib.Common
 
         public MarketResponse GetMarket(MarketRequest request)
         {
-            var query = "getmarketsummary?market=" + $"{request.TradePairId}";
+            var query = "getmarketsummary?market=" + $"{request.TradePair.PairLabel}";
             return GetResult<MarketResponse>(PublicApiCall.GetMarket, query);
         }
 
         public MarketHistoryResponse GetMarketHistory(MarketHistoryRequest request)
         {
-            var query = "getmarkethistory?market=" + $"{request.TradePairId}";
+            var query = "getmarkethistory?market=" + $"{request.TradePair.PairLabel}";
             MarketHistoryResponse r = GetResult<MarketHistoryResponse>(PublicApiCall.GetMarketHistory, query);
 
             foreach(var c in r.Data)
             {
-                c.Label = request.TradePairId;
+                c.Label = request.TradePair.PairLabel;
             }
 
             return r;
@@ -142,8 +142,22 @@ namespace CryptoExchangeLib.Common
 
         public MarketOrdersResponse GetMarketOrders(MarketOrdersRequest request)
         {
-            var query = "getorderbook?market=" + $"{request.TradePairId}" + "&type=both";
-            return GetResult<MarketOrdersResponse>(PublicApiCall.GetMarketOrders, query);
+            var query = "getorderbook?market=" + $"{request.TradePair.PairLabel}" + "&type=both";
+            MarketOrdersResponse r = GetResult<MarketOrdersResponse>(PublicApiCall.GetMarketOrders, query);
+
+            foreach(var c in r.Data.Buy)
+            {
+                c.Label = request.TradePair.PairLabel;
+                c.Total = c.Price * c.Volume;
+            }
+
+            foreach(var c in r.Data.Sell)
+            {
+                c.Label = request.TradePair.PairLabel;
+                c.Total = c.Price * c.Volume;
+            }
+
+            return r;
         }
 
 
@@ -192,7 +206,7 @@ namespace CryptoExchangeLib.Common
             var sr = new StreamReader(stream);
             var content = sr.ReadToEnd();
 
-            string result = Shim.DoPrivate(call, content);
+            string result = DoPrivate(call, content);
 
             return JsonConvert.DeserializeObject<T>(result);
         }
@@ -302,11 +316,10 @@ namespace CryptoExchangeLib.Common
 
         #endregion
 
-    }
 
-    public class Shim
-    {
-        public static string DoPublic(PublicApiCall call, string response)
+        #region Shim Implementation
+
+        public string DoPublic(PublicApiCall call, string response)
         {
             string ret = response;
 
@@ -341,6 +354,8 @@ namespace CryptoExchangeLib.Common
                     break;
 
                 case PublicApiCall.GetMarket:
+                    ret = ret.Replace("\"Data\":[{", "\"Data\":{");
+                    ret = ret.Replace("}]}", "}}");
                     ret = ret.Replace("MarketName", "Label");
                     ret = ret.Replace("Last", "LastPrice");
                     ret = ret.Replace("Ask", "AskPrice");
@@ -364,23 +379,20 @@ namespace CryptoExchangeLib.Common
                     break;
 
                 case PublicApiCall.GetMarketOrders:
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
-                    ret = ret.Replace("", "");
+                    ret = ret.Replace("buy", "Buy");
+                    ret = ret.Replace("sell", "Sell");
+                    ret = ret.Replace("Quantity", "Volume");
+                    ret = ret.Replace("Rate", "Price");
+
 
                     break;
-                
+
             }
 
             return ret;
         }
 
-        public static string DoPrivate(PrivateApiCall call, string response)
+        public string DoPrivate(PrivateApiCall call, string response)
         {
             string ret = response;
 
@@ -436,5 +448,15 @@ namespace CryptoExchangeLib.Common
 
             return ret;
         }
+
+        public string GetTradePairLabel(TradePair tradePair)
+        {
+            return tradePair.PairLabel;
+        }
+
+        #endregion
+
+
     }
+
 }

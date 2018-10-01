@@ -28,7 +28,15 @@ namespace CryptoExchangeLib
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            IExchange cryptopia = new Cryptopia();
+            TradePair tp = new TradePair() { BaseLabel = "BTC", CurrencyLabel = "ETN" };
+            MarketOrdersResponse r = cryptopia.GetMarketOrders(new MarketOrdersRequest(tp));
 
+            //IExchange bittrex = new Bittrex();
+            //TradePair tp = new TradePair() { BaseLabel = "BTC", CurrencyLabel = "RDD" };
+            //MarketOrdersRequest mr = new MarketOrdersRequest(tp);
+            //MarketOrdersResponse r = bittrex.GetMarketOrders(mr);
+            int i = 1;
 
 
             

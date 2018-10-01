@@ -5,4 +5,11 @@ key areas. Namely, less reliance on generics, generated json classes, and reflec
 
 This should end up being a good deal cleaner, though its a work in progress at the moment.
 
-All public API calls and most private API calls should work just fine for both Cryptopia and Bittrex.
+All public API calls and most private API calls should work just fine for both Cryptopia and Bittrex. 
+
+TODO: It might be worthwhile to whip up a webclient class that better encapsulates the private API calls.
+Its kind of a mess the way it is now.
+
+Its worth noting that I purposely avoided doing async/await calls, which actually took some doing to get worked out.
+The only reason for this is that it is a damned nightmare to debug. I may add a separate async namespace back as 
+I get each exchange more or less debugged. It _IS_ a lot cleaner, but not a huge priority at the moment.

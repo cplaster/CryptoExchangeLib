@@ -87,7 +87,7 @@ namespace CryptoExchangeLib.Common
             var response = _client.GetStringAsync(s);
             if (string.IsNullOrEmpty(response.Result))
             {
-                return new T() { Success = false, Error = "No Response." };
+                return new T() {    Success = false, Error = "No Response." };
             }
             return GetObject<T>(response.Result);
         }
@@ -110,19 +110,21 @@ namespace CryptoExchangeLib.Common
 
         public MarketResponse GetMarket(MarketRequest request)
         {
-            var query = request.Hours.HasValue ? $"/{request.TradePairId}/{request.Hours}" : $"/{request.TradePairId}";
+            string tradePairId = request.TradePair.Id.HasValue ? request.TradePair.Id.ToString() : request.TradePair.CurrencyLabel + "_" + request.TradePair.BaseLabel;
+            var query = request.Hours.HasValue ? $"/{tradePairId}/{request.Hours}" : $"/{tradePairId}";
             return GetResult<MarketResponse>(PublicApiCall.GetMarket, query);
         }
 
         public MarketHistoryResponse GetMarketHistory(MarketHistoryRequest request)
         {
-            var query = $"/{request.TradePairId}";
+            var query = $"/{GetTradePairLabel(request.TradePair)}";
             return GetResult<MarketHistoryResponse>(PublicApiCall.GetMarketHistory, query);
         }
 
         public MarketOrdersResponse GetMarketOrders(MarketOrdersRequest request)
         {
-            var query = request.OrderCount.HasValue ? $"/{request.TradePairId}/{request.OrderCount}" : $"/{request.TradePairId}";
+            string tradePairLabel = GetTradePairLabel(request.TradePair);
+            var query = request.OrderCount.HasValue ? $"/{tradePairLabel}/{request.OrderCount}" : $"/{tradePairLabel}";
             return GetResult<MarketOrdersResponse>(PublicApiCall.GetMarketOrders, query);
         }
 
@@ -237,7 +239,19 @@ namespace CryptoExchangeLib.Common
 
         #endregion
 
+        #region Shim Implementation
 
+        public string DoPublic(PublicApiCall call, string result) { return null; }
+
+        public string DoPrivate(PrivateApiCall call, string result) { return null; }
+
+        public string GetTradePairLabel(TradePair tradePair)
+        {
+            return string.Format("{0}_{1}", tradePair.CurrencyLabel, tradePair.BaseLabel);
+        }
+
+
+        #endregion
 
     }
 
